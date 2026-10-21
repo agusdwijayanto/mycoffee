@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual Book — MyCoffee</title>
+<style>
+    :root { --kopi:#4a2c1a; --kopi-2:#6f4125; --krem:#f7efe3; --krem-2:#efe0cb; --aksen:#c98a2d; --teks:#2e2019; --redup:#7d6a5c; --putih:#fffaf3; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:'Segoe UI', system-ui, Arial, sans-serif; background:var(--krem); color:var(--teks); line-height:1.65; }
+    header { background:linear-gradient(135deg,#3a2113,#6f4125); color:#fff; padding:44px 20px 36px; }
+    header .wrap, main { max-width:860px; margin:0 auto; }
+    header h1 { margin:0 0 6px; font-size:34px; letter-spacing:.5px; }
+    header p { margin:0; opacity:.85; }
+    main { padding:28px 20px 60px; background:var(--putih); }
+    h2 { color:var(--kopi); border-bottom:2px solid var(--krem-2); padding-bottom:6px; margin-top:40px; font-size:24px; }
+    h3 { color:var(--kopi-2); margin-top:26px; font-size:19px; }
+    code { background:var(--krem-2); padding:1px 6px; border-radius:4px; font-size:14px; }
+    pre { background:#2b1a10; color:#f3e7d3; padding:14px 16px; border-radius:10px; overflow-x:auto; font-size:13.5px; line-height:1.5; }
+    pre code { background:none; color:inherit; padding:0; }
+    table { border-collapse:collapse; width:100%; margin:14px 0; }
+    th, td { border:1px solid var(--krem-2); padding:8px 12px; text-align:left; }
+    th { background:var(--krem); color:var(--kopi); }
+    .peringatan { background:#fdeeda; border:1px solid var(--aksen); border-radius:10px; padding:14px 18px; margin:16px 0; }
+    ul.cek { list-style:none; padding-left:4px; }
+    ul.cek li { padding:5px 0 5px 30px; position:relative; border-bottom:1px dashed var(--krem-2); }
+    ul.cek li::before { content:'☐'; position:absolute; left:2px; color:var(--aksen); font-size:17px; }
+    a { color:var(--kopi-2); }
+    .daftar-isi { background:var(--krem); border-radius:10px; padding:16px 22px; }
+    .daftar-isi ol { margin:6px 0; }
+    footer { text-align:center; color:var(--redup); font-size:13px; padding:22px; }
+</style>
+</head>
+<body>
+<header>
+    <div class="wrap">
+        <h1>Manual Book MyCoffee</h1>
+        <p>Panduan pasang dan pemakaian aplikasi company profile, menu live, dan POS kasir MyCoffee.</p>
+    </div>
+</header>
+<main>
+    <div class="daftar-isi">
+        <strong>Daftar isi</strong>
+        <ol>
+            <li><a href="#pasang">Cara Pasang di Mac (Herd + DBngin)</a></li>
+            <li><a href="#akun">Akun dan PIN Bawaan</a></li>
+            <li><a href="#kasir">Panduan Kasir</a></li>
+            <li><a href="#admin">Panduan Admin</a></li>
+            <li><a href="#testing">Daftar Testing Manual</a></li>
+            <li><a href="#masalah">Pemecahan Masalah</a></li>
+            <li><a href="#reset">Reset dan Backup</a></li>
+            <li><a href="#jujur">Catatan Jujur (Keterbatasan)</a></li>
+        </ol>
+    </div>
+
+    <h2 id="pasang">1. Cara Pasang di Mac (Herd + DBngin)</h2>
+    <p>Ikuti persis urutan ini. Jangan loncat langkah: <code>php artisan serve</code> adalah langkah terakhir, bukan pertama.</p>
+
+    <h3>Langkah 1 — Nyalakan MySQL dan buat database</h3>
+    <ol>
+        <li>Buka aplikasi <strong>DBngin</strong>, start service MySQL sampai statusnya jalan.</li>
+        <li>Buat database kosong bernama <code>mycoffee</code> dari Terminal di VSCode:
+            <pre><code>mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS mycoffee; SHOW DATABASES LIKE 'mycoffee';"</code></pre>
+            Kriteria lolos: muncul baris <code>mycoffee</code>. Tambahan <code>-h 127.0.0.1</code> penting agar koneksi lewat jaringan (TCP), bukan socket.</li>
+        <li>Bila keluar <code>command not found: mysql</code>, pakai PHP bawaan Herd (hasilnya sama):
+            <pre><code>php -r '$p=new PDO("mysql:host=127.0.0.1;port=3306","root",""); $p-&gt;exec("CREATE DATABASE IF NOT EXISTS mycoffee"); echo "mycoffee OK\n";'</code></pre></li>
+        <li>Jangan buat tabel apa pun secara manual — semua tabel dibuat oleh migrate.</li>
+    </ol>
+
+    <h3>Langkah 2 — Ekstrak dan pasang project</h3>
+    <ol>
+        <li>Ekstrak zip project; isi folder project harus langsung terlihat: file <code>artisan</code>, <code>composer.json</code>, <code>README.md</code>, <code>MANUAL_BOOK.md</code>, dan folder <code>app</code>. Letakkan di folder Herd (misalnya <code>~/Herd/mycoffee</code>) agar bisa dibuka lewat <code>mycoffee.test</code>.</li>
+        <li>Buka Terminal di folder project, lalu jalankan:
+            <pre><code>composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed</code></pre></li>
+        <li>Patokan: <code>composer install</code> tanpa error dan folder <code>vendor</code> terbentuk; <code>key:generate</code> menampilkan <em>Application key set successfully</em>; <code>migrate --seed</code> semua tabel DONE dan berakhir <em>Database seeding completed successfully</em>.</li>
+        <li>Sesuaikan <code>.env</code> bila setting DBngin berbeda. Bawaan DBngin: <code>DB_HOST=127.0.0.1</code>, <code>DB_PORT=3306</code>, <code>DB_DATABASE=mycoffee</code>, <code>DB_USERNAME=root</code>, <code>DB_PASSWORD=</code> (kosong).</li>
+    </ol>
+
+    <h3>Langkah 3 — Pilihan data</h3>
+    <ul>
+        <li><strong>Data demo (bawaan, <code>DEMO_DATA=true</code>):</strong> terisi 15 transaksi contoh 7 hari terakhir dan 4 pengeluaran contoh — dashboard dan laporan langsung ada isinya. Cocok untuk portofolio.</li>
+        <li><strong>Data bersih:</strong> ubah menjadi <code>DEMO_DATA=false</code> di <code>.env</code> SEBELUM <code>migrate --seed</code>. Isinya hanya data pokok (kategori, menu, gallery, pengaturan, akun).</li>
+    </ul>
+
+    <h3>Langkah 4 — Buka aplikasinya</h3>
+    <pre><code>php artisan serve</code></pre>
+    <p>Buka <code>http://127.0.0.1:8000</code>, atau <code>http://mycoffee.test</code> bila project di folder Herd. Terminal yang menjalankan <code>serve</code> jangan ditutup.</p>
+
+    <h2 id="akun">2. Akun dan PIN Bawaan</h2>
+    <table>
+        <tr><th>Peran</th><th>Email</th><th>Password</th><th>PIN</th></tr>
+        <tr><td>Admin</td><td>admin@mycoffee.id</td><td>password</td><td>1111</td></tr>
+        <tr><td>Kasir</td><td>kasir@mycoffee.id</td><td>password</td><td>1234</td></tr>
+    </table>
+    <div class="peringatan"><strong>PERINGATAN:</strong> semua kredensial di atas adalah contoh untuk latihan dan portofolio. Bila aplikasi dipakai untuk bisnis beneran, WAJIB ganti password dan PIN (menu <strong>Pengguna &amp; PIN</strong>) sebelum dipakai kasir sungguhan.</div>
+
+    <h2 id="kasir">3. Panduan Kasir</h2>
+    <h3>Masuk (login)</h3>
+    <ul>
+        <li><strong>Login email:</strong> buka <code>/login</code>, isi email dan password — kasir langsung diarahkan ke POS.</li>
+        <li><strong>Login PIN:</strong> buka <code>/login-pin</code>, pilih nama pengguna, masukkan PIN 4 angka. Cocok untuk ganti shift cepat.</li>
+    </ul>
+    <h3>Melayani transaksi di POS</h3>
+    <ol>
+        <li>Pilih kategori atau cari menu di kolom pencarian.</li>
+        <li><strong>Makanan dan Dessert:</strong> ketuk kartunya sekali — langsung masuk keranjang.</li>
+        <li><strong>Minuman (Kopi dan Non-Kopi):</strong> ketuk kartunya — muncul <strong>pop-up opsi</strong>: Ukuran (Regular/Large), Level Manis (No/Low/Half/Normal), Level Es (No/Low/Half/Normal), Add-on (extra shot, susu oat, gula aren), Catatan bebas, dan Jumlah — lalu tekan <strong>Tambahkan</strong>. Pop-up bisa ditutup dengan <strong>Batal</strong> atau klik di luar kotak tanpa menambah item.</li>
+        <li>Kombinasi yang sama persis menyatu dalam satu baris; kombinasi berbeda menjadi baris terpisah.</li>
+        <li>Di keranjang: <strong>− / +</strong> mengubah jumlah, <strong>×</strong> menghapus, tombol <strong>Ubah</strong> membuka pop-up dengan nilai baris itu terisi — simpan untuk mengubah barisnya (bukan menambah baru).</li>
+        <li>Isi bila perlu: Nama Pelanggan, Nomor Meja, Kanal Penjualan, Diskon %, Kode Voucher.</li>
+        <li>Metode bayar: <strong>Tunai</strong> — isi uang bayar; bila kurang, transaksi ditolak dan tidak tersimpan; kembalian dihitung otomatis di struk. <strong>QRIS</strong> — tampil kotak QR bertuliskan <em>QRIS DUMMY - contoh</em> (bukan kode asli); pembayaran dianggap pas.</li>
+        <li>Tekan <strong>Bayar &amp; Simpan Transaksi</strong>. Stok menu dan bahan baku berkurang otomatis. Muncul <strong>struk</strong> dengan nomor antrean besar — tersedia cetak biasa, <strong>Cetak 58mm</strong> (thermal), dan <strong>Struk Barista</strong>.</li>
+    </ol>
+    <p>Di HP, keranjang tampil sebagai bar tetap di bawah layar; ketuk bar itu untuk membuka panel keranjang penuh. Di tablet dan desktop, keranjang menempel di kanan.</p>
+
+    <h3>Pesanan pending (tahan per meja)</h3>
+    <ol>
+        <li>Susun pesanan di keranjang, isi Nomor Meja atau Nama Pelanggan (wajib salah satu).</li>
+        <li>Tekan <strong>Tahan sebagai Pesanan</strong>. Pesanan tersimpan pending dan stoknya diamankan (berkurang).</li>
+        <li>Di menu <strong>Pesanan Terbuka</strong>: buka kembali untuk menambah item lalu <strong>Simpan Perubahan</strong>, bayar lewat form bayar biasa, atau batalkan — pembatalan mengembalikan stok.</li>
+    </ol>
+
+    <h3>Shift kasir</h3>
+    <ol>
+        <li>Isi modal awal di panel atas POS, tekan <strong>Buka Shift</strong> (opsional).</li>
+        <li>Di akhir kerja buka <strong>Shift Saya</strong>, tutup shift, isi <strong>uang fisik</strong> di laci.</li>
+        <li>Sistem menghitung total tunai dan QRIS selama shift dan menampilkan <strong>selisih</strong>.</li>
+    </ol>
+
+    <h3>Layar barista</h3>
+    <p>Menu <strong>Layar Barista</strong> menampilkan pesanan terbayar hari ini dalam kolom <strong>Baru</strong>, <strong>Dibuat</strong>, <strong>Selesai</strong> — tekan tombol status untuk memindahkan kartu. Hanya berisi item dan catatan (tanpa harga); versi cetaknya adalah Struk Barista.</p>
+
+    <h3>Absensi</h3>
+    <p>Di bagian bawah sidebar ada tombol <strong>Absen Masuk</strong> dan <strong>Absen Pulang</strong> — satu ketuk mencatat jam hari itu.</p>
+
+    <h2 id="admin">4. Panduan Admin</h2>
+    <h3>Dashboard dan Laporan</h3>
+    <ul>
+        <li><strong>Dashboard:</strong> omzet hari ini dan bulan ini, jumlah transaksi, menu terlaris, daftar <strong>Stok Menipis</strong> (batas bawaan 5) dan daftar menu <strong>HABIS</strong>.</li>
+        <li><strong>Laporan:</strong> filter rentang tanggal bebas; omzet, laba kotor (dari harga modal), pengeluaran, laba bersih, omzet per kanal, per metode bayar, per kasir. Tombol <strong>Ekspor CSV</strong> dan <strong>Kirim Rekap via WhatsApp</strong> ke nomor pemilik.</li>
+    </ul>
+    <h3>Kelola menu, stok, dan bahan</h3>
+    <ul>
+        <li><strong>Kelola Menu:</strong> nama, kategori, deskripsi, harga, tambahan harga Large, harga modal, foto, stok, status aktif. Perubahan stok tercatat di <strong>Riwayat Stok</strong>.</li>
+        <li><strong>Status HABIS</strong> berlaku otomatis bila: stok menu 0, menu dinonaktifkan, atau stok bahan baku resepnya tidak cukup untuk 1 porsi. Menu habis tetap tampil dengan stiker HABIS dan tidak bisa dijual.</li>
+        <li><strong>Bahan Baku:</strong> kelola bahan dan resep per menu; penjualan mengurangi stok bahan sesuai takaran; void dan pembatalan mengembalikannya.</li>
+        <li><strong>Menu musiman:</strong> isi tanggal tampil dari/sampai agar menu hanya muncul pada rentang itu.</li>
+        <li><strong>Bundel &amp; Add-on:</strong> paket dengan satu harga (selisih komponen menjadi diskon otomatis) dan add-on berbayar untuk minuman.</li>
+    </ul>
+    <h3>Voucher dan promo</h3>
+    <ul>
+        <li><strong>Voucher:</strong> kode persen atau nominal, tanggal berlaku, status aktif. Contoh bawaan: <code>HEMAT10</code> (10%) dan <code>NGOPI20</code> (Rp 20.000). Kode salah/kedaluwarsa ditolak kasir.</li>
+        <li><strong>Beli 2 Gratis 1:</strong> pilih menu sasaran di Pengaturan; jumlah menu itu mencapai 3 dalam satu transaksi memberi diskon sebesar 1 harga menu.</li>
+        <li>Voucher, promo, dan diskon persen digabung dalam satu perhitungan dan tercatat di transaksi serta struk.</li>
+    </ul>
+    <h3>Void transaksi</h3>
+    <p>Di <strong>Riwayat Transaksi → Detail</strong>, admin dapat men-void transaksi terbayar dengan <strong>alasan wajib</strong>. Akibatnya: stok menu dan bahan kembali, transaksi keluar dari semua angka laporan/dashboard, riwayatnya tetap tersimpan berstatus void beserta alasan.</p>
+    <h3>Pengaturan brand</h3>
+    <p>Nama brand, tagline, alamat, telepon, WhatsApp, WhatsApp pemilik, email, jam buka, Instagram, persen pajak, batas stok minimum, dan promo diubah di menu <strong>Pengaturan</strong> — nama brand langsung tampil di website publik dan panel. Di sini juga ada <strong>QR menu</strong> (SVG) untuk dicetak dan ditempel di meja.</p>
+    <h3>Testimoni, reservasi, jadwal, pengguna</h3>
+    <ul>
+        <li><strong>Testimoni:</strong> kiriman website menunggu persetujuan sebelum tampil di Beranda.</li>
+        <li><strong>Reservasi:</strong> kiriman dari halaman Kontak; ubah status (menunggu/dikonfirmasi/selesai/dibatalkan).</li>
+        <li><strong>Jadwal Karyawan</strong> dan <strong>Pengguna &amp; PIN</strong> untuk kelola jadwal mingguan dan PIN login.</li>
+    </ul>
+    <h3>Pengembangan Berikutnya (pratinjau)</h3>
+    <p>5 kartu pratinjau: Multi Cabang, Aplikasi Pelanggan, Payment Gateway Live, Integrasi Akuntansi, Ramalan Penjualan — berlabel besar <strong>SEGERA HADIR</strong> dengan data contoh DUMMY. Hanya tampilan konsep, belum berfungsi, hanya untuk admin.</p>
+
+    <h2 id="testing">5. Daftar Testing Manual</h2>
+    <h3>Publik</h3>
+    <ul class="cek">
+        <li>Beranda, Tentang, Menu, Gallery, Kontak terbuka; semua foto tampil.</li>
+        <li>Halaman Menu menampilkan menu berkelompok per kategori dengan foto besar.</li>
+        <li>Ganti bahasa ID ke EN: label navigasi berubah, stiker HABIS menjadi SOLD OUT.</li>
+        <li>Beranda menampilkan strip foto gallery persegi; klik strip membuka Gallery.</li>
+        <li>Tombol Pesan via WhatsApp pada kartu menu membuka WhatsApp dengan teks nama menu terisi.</li>
+    </ul>
+    <h3>Login</h3>
+    <ul class="cek">
+        <li>Login email kasir benar masuk ke POS.</li>
+        <li>Login PIN kasir 1234 masuk ke POS; PIN salah ditolak.</li>
+        <li>Kasir membuka /admin/vouchers atau Pengaturan ditolak (403).</li>
+    </ul>
+    <h3>Transaksi kasir</h3>
+    <ul class="cek">
+        <li>Makanan (mis. Nasi Goreng) sekali ketuk langsung masuk keranjang.</li>
+        <li>Minuman (mis. Latte) membuka pop-up opsi; grid menu tetap utuh di belakang pop-up.</li>
+        <li>Di tablet/HP, sidebar tampil sebagai drawer: sembunyi bawaan, terbuka dari tombol hamburger dengan latar gelap, tertutup dari tombol × atau klik latar.</li>
+        <li>Tunai: beli 1 Espresso (Rp 18.000) bayar Rp 50.000, struk tampil, kembalian Rp 32.000, stok berkurang 1.</li>
+        <li>Opsi lengkap: Latte Large, manis Low, es Half, Extra Shot, catatan terisi — tercetak persis di struk kasir DAN struk barista; harga satuan termasuk tambahan Large dan add-on.</li>
+        <li>Tombol Ubah pada baris keranjang membuka pop-up bernilai lama; ubah level manis, ringkasan dan total berubah.</li>
+        <li>Bayar kurang dari total ditolak, transaksi tidak tersimpan, stok tidak berubah.</li>
+        <li>Metode QRIS: kotak QRIS DUMMY tampil, transaksi tersimpan, kembalian 0.</li>
+        <li>Voucher HEMAT10 memotong total 10%; kode sembarangan ditolak.</li>
+        <li>Struk mode 58mm tampil sempit siap cetak thermal.</li>
+    </ul>
+    <h3>Pesanan pending</h3>
+    <ul class="cek">
+        <li>Buat pesanan pending bernomor meja: muncul di Pesanan Terbuka, stok berkurang.</li>
+        <li>Buka kembali, tambah 1 item, simpan perubahan: isi pesanan bertambah.</li>
+        <li>Bayar pesanan pending: status lunas dan struk keluar.</li>
+        <li>Pesanan pending lain dibatalkan: stok kembali seperti semula.</li>
+    </ul>
+    <h3>Stok dan HABIS</h3>
+    <ul class="cek">
+        <li>Stok menu diatur 1 lalu dijual 1: menu berstiker HABIS di website dan tidak bisa masuk keranjang.</li>
+        <li>Stok Susu Segar diturunkan hingga tidak cukup 1 porsi Latte: Latte HABIS walaupun stok menunya ada.</li>
+        <li>Menu berstok 5 ke bawah muncul di daftar Stok Menipis dashboard (bukan HABIS).</li>
+    </ul>
+    <h3>Admin dan laporan</h3>
+    <ul class="cek">
+        <li>Void satu transaksi dengan alasan: omzet laporan berkurang sebesar itu dan stok kembali.</li>
+        <li>Filter laporan rentang lain: angka mengikuti rentang; Ekspor CSV terunduh sesuai rentang.</li>
+        <li>Laporan menampilkan rincian per metode bayar, per kanal, per kasir.</li>
+        <li>Shift: buka shift, 1 transaksi tunai, tutup dengan uang fisik berbeda, selisih terhitung benar.</li>
+        <li>Absensi: Absen Masuk lalu Absen Pulang mencatat jam hari ini.</li>
+        <li>Reservasi dari halaman Kontak muncul di panel admin.</li>
+        <li>Testimoni dari website tidak langsung tampil; tampil setelah disetujui admin.</li>
+        <li>Pengembangan Berikutnya: 5 pratinjau berlabel SEGERA HADIR; dibuka kasir ditolak (403).</li>
+        <li>Menu Manual Book di sidebar membuka buku ini di tab baru.</li>
+    </ul>
+
+    <h2 id="masalah">6. Pemecahan Masalah</h2>
+    <h3>Failed opening required .../vendor/autoload.php</h3>
+    <p>Penyebab: <code>composer install</code> belum dijalankan (folder <code>vendor</code> belum ada). Atasi: jalankan <code>composer install</code> sampai selesai. Jangan menjalankan <code>serve</code> sebelum langkah ini beres.</p>
+    <h3>ERROR 2002 (HY000): Can't connect to local MySQL server through socket</h3>
+    <p>Penyebab: MySQL belum berjalan (DBngin belum di-start) atau client mencari socket yang salah. Atasi: start MySQL di DBngin, lalu hubungkan lewat jaringan:</p>
+    <pre><code>mysql -h 127.0.0.1 -u root</code></pre>
+    <h3>bootstrap/cache directory must be present and writable</h3>
+    <p>Penyebab: folder <code>bootstrap/cache</code> (dan sebagian <code>storage</code>) tidak ikut saat ekstrak. Atasi dari folder project:</p>
+    <pre><code>mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+php artisan key:generate</code></pre>
+    <h3>Access denied for user 'root'@'localhost'</h3>
+    <p>Penyebab: password root DBngin berbeda dari <code>.env</code>. Atasi: samakan <code>DB_USERNAME</code>/<code>DB_PASSWORD</code> di <code>.env</code>, lalu jalankan <code>php artisan config:clear</code>.</p>
+    <h3>Halaman tidak berubah setelah mengubah .env</h3>
+    <p>Jalankan <code>php artisan config:clear</code>, lalu muat ulang halaman.</p>
+
+    <h2 id="reset">7. Reset dan Backup</h2>
+    <h3>Reset data ke kondisi awal seed</h3>
+    <pre><code>php artisan migrate:fresh --seed</code></pre>
+    <p>Perintah ini MENGHAPUS semua tabel dan mengisinya kembali dari seeder (mengikuti <code>DEMO_DATA</code> di <code>.env</code>). Gunakan hanya bila mau mulai bersih.</p>
+    <h3>Backup database</h3>
+    <pre><code>mysqldump -h 127.0.0.1 -u root mycoffee &gt; backup-mycoffee-$(date +%F).sql</code></pre>
+    <p>Memulihkan:</p>
+    <pre><code>mysql -h 127.0.0.1 -u root mycoffee &lt; backup-mycoffee-2026-10-21.sql</code></pre>
+    <p>Backup juga folder <code>public/images</code> dan file <code>.env</code> agar pemulihan lengkap.</p>
+
+    <h2 id="jujur">8. Catatan Jujur (Keterbatasan Versi Ini)</h2>
+    <ul>
+        <li><strong>QRIS masih dummy.</strong> Kotak QR di POS hanya contoh tampilan berlabel jelas, bukan kode pembayaran asli; tidak ada integrasi payment gateway. Pembayaran QRIS dianggap pas.</li>
+        <li><strong>Pratinjau versi 4 bersifat static.</strong> Multi Cabang, Aplikasi Pelanggan, Payment Gateway Live, Integrasi Akuntansi, dan Ramalan Penjualan baru tampilan "Segera Hadir" tanpa fungsi.</li>
+        <li><strong>Markup harga ojol belum ada.</strong> Kanal GoFood/GrabFood tercatat terpisah di laporan, tetapi harganya sama dengan dine-in.</li>
+        <li><strong>Data demo.</strong> Kontak, alamat, harga, akun, dan 15 transaksi contoh adalah dummy. Matikan dengan <code>DEMO_DATA=false</code> sebelum <code>migrate --seed</code>; ganti semua kredensial bawaan sebelum dipakai bisnis beneran.</li>
+        <li><strong>Satu toko, satu server lokal.</strong> Aplikasi berjalan di satu komputer (Mac + Herd); perangkat lain di jaringan lokal yang sama dapat membukanya lewat alamat IP komputer itu.</li>
+    </ul>
+</main>
+<footer>Manual Book MyCoffee — versi file ini sama isinya dengan MANUAL_BOOK.md di root project.</footer>
+</body>
+</html>
